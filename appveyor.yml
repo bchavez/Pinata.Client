@@ -1,0 +1,60 @@
+version: '{build}'
+image: Visual Studio 2019
+
+init:
+    - ps: |
+            If ($Env:APPVEYOR_REPO_TAG_NAME -match "-"){
+              Set-AppveyorBuildVariable -Name "IsPreRelease" -Value True
+            }
+            Else{
+              Set-AppveyorBuildVariable -Name "IsPreRelease" -Value False
+            }
+
+build_script: 
+  - build.cmd ci
+
+test_script:
+  - build.cmd citest
+
+artifacts:
+  - path: __package\*.nupkg
+    name: NuGet
+  - path: __package\*.snupkg
+    name: Symbols
+  - path: __package\*.zip
+    name: Zip
+
+nuget:
+  disable_publish_on_pr: true
+
+deploy:
+    - provider: GitHub
+      release: 'Release $(APPVEYOR_REPO_TAG_NAME) build $(APPVEYOR_BUILD_VERSION)'
+      tag: $(APPVEYOR_REPO_TAG_NAME)
+      description: '[**CHANGE LOG**](https://github.com/bchavez/Pinata.Client/blob/master/HISTORY.md)'
+      prerelease: $(IsPreRelease)
+      artifact: Zip, NuGet, Symbols
+      auth_token:
+          secure: cyivrWQwrZNAb6UCNXlIQlGfVSnKIC6TatUOIP95CQgMeKGnmBSqBgAFv2TsRZhR
+      on:
+          branch: master
+          appveyor_repo_tag_name: /v\d+\.\d+\.\d+/ 
+          appveyor_repo_tag: true
+
+    - provider: NuGet
+      server:
+      symbol_server:
+      skip_symbols: false
+      api_key:
+          secure: 1nPS2ttf+N4+FUhd+GZycrL7YzSWQpZjnGOMCb5+pGJXSdx0IFvVF8xhTGna7B9t
+      artifact: NuGet, Symbols
+      on:
+          branch: master
+          appveyor_repo_tag_name: /v\d+\.\d+\.\d+/
+          appveyor_repo_tag: true
+
+on_failure:
+    - ps: |
+            # Enables RDP for debugging and setup some tools
+            # $blockRdp = $true; choco install notepad2; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+            

@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/f9wf44xwah32s0le/branch/master?svg=true)](https://ci.appveyor.com/project/bchavez/pinata-client) [![Nuget](https://img.shields.io/nuget/v/Pinata.Client.svg)](https://www.nuget.org/packages/Pinata.Client/) [![Users](https://img.shields.io/nuget/dt/Pinata.Client.svg)](https://www.nuget.org/packages/Pinata.Client/) <img src="https://raw.githubusercontent.com/bchavez/Pinata.Client/master/Docs/pinata.png" align='right' />
+[![Build status](https://ci.appveyor.com/api/projects/status/tp8iyv60j05q8hfl/branch/master?svg=true)](https://ci.appveyor.com/project/bchavez/pinata-client) [![Nuget](https://img.shields.io/nuget/v/Pinata.Client.svg)](https://www.nuget.org/packages/Pinata.Client/) [![Users](https://img.shields.io/nuget/dt/Pinata.Client.svg)](https://www.nuget.org/packages/Pinata.Client/) <img src="https://raw.githubusercontent.com/bchavez/Pinata.Client/master/Docs/pinata.png" align='right' />
 
 Pinata.Client for .NET/C# Library
 ======================

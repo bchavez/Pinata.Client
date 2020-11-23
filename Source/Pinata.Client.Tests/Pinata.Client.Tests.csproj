@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net472;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <CodeAnalysisRuleSet>..\Pinata.Client\Pinata.Client.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="Flurl" Version="2.8.2" />
+    <PackageReference Include="Flurl.Http" Version="2.4.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NunitXml.TestLogger" Version="2.1.62" />
+    <PackageReference Include="Verify.NUnit" Version="6.14.1" />
+    <PackageReference Include="WebSocket4Net" Version="0.15.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pinata.Client\Pinata.Client.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="**\*.server.*">
+      <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+    </None>
+  </ItemGroup>
+</Project>

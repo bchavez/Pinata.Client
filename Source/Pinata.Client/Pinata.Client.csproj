@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>A .NET implementation for the Pinata Cloud API. Used for pinning files to IPFS.</Description>
+    <Version>0.0.0-localbuild</Version>
+    <Authors>Brian Chavez</Authors>
+    <PackageReleaseNotes />
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <PackageTags>pinata;ipfs</PackageTags>
+    <PackageIconUrl>https://raw.githubusercontent.com/bchavez/Pinata.Client/master/Docs/pinata.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/bchavez/Pinata.Client</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/bchavez/Pinata.Client/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/bchavez/Pinata.Client</RepositoryUrl>
+    <CodeAnalysisRuleSet>Pinata.Client.ruleset</CodeAnalysisRuleSet>
+    <!--Source Link Settings-->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>false</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Flurl" Version="2.8.2" />
+    <PackageReference Include="Flurl.Http" Version="2.4.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Roslynator.Analyzers" Version="2.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="WebSocket4Net" Version="0.15.2" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+</Project>

@@ -28,7 +28,6 @@ namespace Pinata.Client
    public partial class PinataClient : FlurlClient, IPinataClient
    {
       public const string Endpoint = "https://api.pinata.cloud";
-
       public Config Config { get; }
 
       internal static readonly string UserAgent =
@@ -53,9 +52,9 @@ namespace Pinata.Client
 
       private void ApiKeyAuth(ClientFlurlHttpSettings settings)
       {
-         async Task SetHeaders(HttpCall http)
+         async Task SetHeaders(FlurlCall call)
          {
-            http.FlurlRequest
+            call.Request
                .WithHeader(PinataApiKey, this.Config.ApiKey)
                .WithHeader(PinataSecretApiKey, this.Config.ApiSecret);
          }

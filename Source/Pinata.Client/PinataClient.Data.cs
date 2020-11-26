@@ -6,9 +6,22 @@ using Pinata.Client.Models;
 
 namespace Pinata.Client
 {
+   /// <summary>
+   /// The Data endpoint of Pinata Cloud.
+   /// </summary>
    public interface IDataEndpoint
    {
+      /// <summary>
+      /// Performs a connection test to the API with the configured credentials. Success message should read:
+      /// Congratulations! You are communicating with the Pinata API!
+      /// </summary>
       Task<TestAuthenticationResponse> TestAuthenticationAsync(CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// This endpoint returns the total combined size for all content that you've pinned through Pinata
+      /// </summary>
+      Task<UserPinnedDataTotalResponse> UserPinnedDataTotalAsync(CancellationToken cancellationToken = default);
+      Task<object> PinList(CancellationToken cancellationToken = default);
    }
 
    public partial class PinataClient : IDataEndpoint
@@ -23,6 +36,19 @@ namespace Pinata.Client
             .WithClient(this)
             .AppendPathSegment("testAuthentication")
             .GetJsonAsync<TestAuthenticationResponse>(cancellationToken);
+      }
+
+      Task<UserPinnedDataTotalResponse> IDataEndpoint.UserPinnedDataTotalAsync(CancellationToken cancellationToken)
+      {
+         return this.DataEndpoint
+            .WithClient(this)
+            .AppendPathSegment("userPinnedDataTotal")
+            .GetJsonAsync<UserPinnedDataTotalResponse>(cancellationToken);
+      }
+
+      Task<object> IDataEndpoint.PinList(CancellationToken cancellationToken)
+      {
+         throw new System.NotImplementedException();
       }
    }
 }

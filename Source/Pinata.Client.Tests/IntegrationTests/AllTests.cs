@@ -6,7 +6,7 @@ using VerifyNUnit;
 namespace Pinata.Client.Tests.IntegrationTests
 {
    [Explicit]
-   public class BasicTests : IntegrationTest
+   public class AllTests : IntegrationTest
    {
       private PinataClient client;
 
@@ -26,6 +26,13 @@ namespace Pinata.Client.Tests.IntegrationTests
       public async Task can_auth()
       {
          var resp = await this.client.Data.TestAuthenticationAsync();
+         await Verify(resp);
+      }
+
+      [Test]
+      public async Task data_pin_total()
+      {
+         var resp = await this.client.Data.UserPinnedDataTotalAsync();
          await Verify(resp);
       }
    }

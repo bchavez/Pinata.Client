@@ -1,23 +1,22 @@
+using System.IO;
 using System.Threading.Tasks;
 using Flurl.Http.Testing;
 using NUnit.Framework;
 using VerifyTests;
-
+using static Pinata.Client.HeaderNames;
 namespace Pinata.Client.Tests
 {
-   public class Test
+   public class MockServerTest : HasVerifyTest
    {
       protected HttpTest server;
-      protected VerifySettings settings;
 
       [SetUp]
       public virtual void BeforeEachTest()
       {
          this.server = new HttpTest();
 
-#if NET45
-         Directory.SetCurrentDirectory(Path.GetDirectoryName(this.GetType().Assembly.Location));
-#endif
+         var startupFolder = Path.GetDirectoryName(this.GetType().Assembly.Location);
+         Directory.SetCurrentDirectory(startupFolder);
       }
 
       [TearDown]
@@ -31,7 +30,9 @@ namespace Pinata.Client.Tests
       protected virtual void EnsureEveryRequestHasCorrectHeaders()
       {
          server.ShouldHaveMadeACall()
-            .WithHeader("User-Agent", PinataClient.UserAgent);
+            .WithHeader("User-Agent", PinataClient.UserAgent)
+            .WithHeader(PinataApiKey)
+            .WithHeader(PinataSecretApiKey);
       }
    }
 }

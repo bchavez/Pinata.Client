@@ -15,13 +15,14 @@ namespace Pinata.Client.Tests.IntegrationTests
    }
 
    [Explicit]
-   public class IntegrationTest
+   public class IntegrationTest : HasVerifyTest
    {
       protected Secrets secrets;
 
       public IntegrationTest()
       {
-         Directory.SetCurrentDirectory(Path.GetDirectoryName(typeof(IntegrationTest).Assembly.Location));
+         var startupFolder = Path.GetDirectoryName(typeof(IntegrationTest).Assembly.Location);
+         Directory.SetCurrentDirectory(startupFolder);
 
          ReadSecrets();
 

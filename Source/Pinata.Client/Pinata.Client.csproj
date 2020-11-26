@@ -3,8 +3,9 @@
     <Description>A .NET implementation for the Pinata Cloud API. Used for pinning files to IPFS.</Description>
     <Version>0.0.0-localbuild</Version>
     <Authors>Brian Chavez</Authors>
-    <PackageReleaseNotes>
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>## v0.1.0
+* Initial version.
+Full History Here: https://github.com/bchavez/Pinata.Client/blob/master/HISTORY.md</PackageReleaseNotes>
     <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyOriginatorKeyFile>

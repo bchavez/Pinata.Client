@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
+using VerifyNUnit;
 
 namespace Pinata.Client.Tests.IntegrationTests
 {
@@ -21,13 +22,11 @@ namespace Pinata.Client.Tests.IntegrationTests
          client.EnableFiddlerDebugProxy("http://localhost.:8888");
       }
 
-
       [Test]
       public async Task can_auth()
       {
          var resp = await this.client.Data.TestAuthenticationAsync();
-         resp.Should().NotBeNull();
-         resp.Message.Should().Be("Congratulations! You are communicating with the Pinata API!");
+         await Verify(resp);
       }
    }
 }

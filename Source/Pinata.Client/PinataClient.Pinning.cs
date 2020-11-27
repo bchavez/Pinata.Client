@@ -70,10 +70,9 @@ namespace Pinata.Client
    public interface IPinningEndpoint
    {
       Task<IFlurlResponse> UnpinAsync(string hashToUnpin, CancellationToken cancellationToken = default);
-      Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(string jsonContent, PinataMetadata pinataMetadata = null,
-         PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
-      Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(object pinataContent, PinataMetadata pinataMetadata = null,
-         PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+      Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(string jsonContent, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+      Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(object pinataContent, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+
    }
 
    public partial class PinataClient : IPinningEndpoint
@@ -106,8 +105,8 @@ namespace Pinata.Client
                   pinataMetadata
                };
             var payloadJson = JsonConvert.SerializeObject(payload);
-            var indexOfPatternStart = payloadJson.IndexOf(ReplacePattern);
-            var indexOfPatternEnd = indexOfPatternStart + ReplacePattern.Length;
+            var indexOfPatternStart = payloadJson.IndexOf(ReplacePattern) - 1;
+            var indexOfPatternEnd = indexOfPatternStart + ReplacePattern.Length + 2;
 
             var sb = new StringBuilder();
             var startJson = payloadJson.Substring(0, indexOfPatternStart);

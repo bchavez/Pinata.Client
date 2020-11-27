@@ -71,7 +71,42 @@ namespace Pinata.Client.Tests.IntegrationTests
                   }
             };
 
+         var r = await this.client.Pinning.PinJsonToIpfsAsync(json, meta, opts);
+      }
+
+      [Test]
+      public async Task pinning_pinJson_as_object()
+      {
+         var body = new { hello = "world" };
+         var r = await this.client.Pinning.PinJsonToIpfsAsync(body);
+      }
+      [Test]
+      public async Task pinning_pinJson_as_object_with_options()
+      {
+         var body = new { hello = "world" };
+
+         var opts = new PinataOptions
+            {
+               CidVersion = 1,
+            };
+         opts.CustomPinPolicy.AddOrUpdateRegion("FRA1", 1);
+
+         var meta = new PinataMetadata
+            {
+               Name = "hello",
+               KeyValues =
+                  {
+                     { "someKey", "someValue" }
+                  }
+            };
+
          var r = await this.client.Pinning.PinJsonToIpfsAsync(body, meta, opts);
+      }
+
+      [Test]
+      public async Task pinning_set_userPinPolicy()
+      {
+
       }
    }
 }

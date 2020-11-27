@@ -28,7 +28,7 @@ namespace Pinata.Client.Tests
             .With(fc => fc.Request.Url.Path == path);
       }
 
-      public static HttpCallAssertion WithHaveExactBody(this HttpCallAssertion assert, string body)
+      public static HttpCallAssertion WithExactBody(this HttpCallAssertion assert, string body)
       {
          return assert.With(fc =>
             {

@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Mime;
+using System.Text;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -110,6 +114,33 @@ namespace Pinata.Client.Tests.IntegrationTests
          var policy = new PinPolicy();
          policy.AddOrUpdateRegion("FRA1", 1);
          var r = await this.client.Pinning.UserPinPolicyAsync(policy);
+      }
+
+      [Test]
+      public async Task pinning_pinFileToIPFS_bytes()
+      {
+         var html = @"
+<html>
+   <head>
+      <title>Hello IPFS!</title>
+   </head>
+   <body>
+      <h1>Hello World</h1>
+   </body>
+</html>
+";
+         var r = await this.client.Pinning.PinFileToIPFSAsync(content =>
+         {
+            var fileData = new StringContent(html, Encoding.UTF8, MediaTypeNames.Text.Html);
+            var header = new ContentDispositionHeaderValue("form-data") {
+               Name = "file",
+               FileName = "test.html"
+            };
+            fileData.Headers.ContentDisposition = header;
+
+            content.Add(fileData);
+         });
+
       }
    }
 }

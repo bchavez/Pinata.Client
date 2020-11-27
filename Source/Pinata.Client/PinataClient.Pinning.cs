@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Flurl.Http.Content;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -27,6 +30,12 @@ namespace Pinata.Client
       /// </summary>
       [JsonProperty("customPinPolicy")]
       public PinPolicy CustomPinPolicy { get; set; } = new PinPolicy();
+
+      /// <summary>
+      /// Wrap your content inside of a directory when adding to IPFS. This allows users to retrieve content via a filename instead of just a hash.
+      /// </summary>
+      [JsonProperty("wrapWithDirectory")]
+      public bool? WrapWithDirectory { get; set; }
    }
 
    public class PinPolicy : Json
@@ -97,6 +106,11 @@ namespace Pinata.Client
       /// Following a successful call of this endpoint, the new pin policy provided will be utilized for every new piece of content pinned to IPFS via Pinata.
       /// </summary>
       Task<UserPinPolicyResponse> UserPinPolicyAsync(PinPolicy newPinPolicy, bool migratePreviousPins = false, CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// This endpoint allows the sender to add and pin any file, or directory, to Pinata's IPFS nodes.
+      /// </summary>
+      Task<IFlurlResponse> PinFileToIPFSAsync(Action<CapturedMultipartContent> callback, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
    }
 
    public partial class PinataClient : IPinningEndpoint
@@ -172,5 +186,27 @@ namespace Pinata.Client
                }, cancellationToken)
             .ReceiveJson<UserPinPolicyResponse>();
       }
+
+      public Task<IFlurlResponse> PinFileToIPFSAsync(Action<CapturedMultipartContent> callback, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
+      {
+         return this.PinningEndpoint
+            .WithClient(this)
+            .AppendPathSegment("pinFileToIPFS")
+            .PostMultipartAsync(multiPart =>
+            {
+               callback(multiPart);
+               if( pinataMetadata is not null )
+               {
+                  multiPart.AddJson("pinataMetadata", pinataMetadata);
+               }
+               if( pinataOptions is not null )
+               {
+                  multiPart.AddJson("pinataOptions", pinataOptions);
+               }
+            }, cancellationToken);
+      }
    }
 }
+
+
+

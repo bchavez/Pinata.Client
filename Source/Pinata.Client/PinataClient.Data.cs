@@ -21,6 +21,12 @@ namespace Pinata.Client
       /// This endpoint returns the total combined size for all content that you've pinned through Pinata
       /// </summary>
       Task<UserPinnedDataTotalResponse> UserPinnedDataTotalAsync(CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// This endpoint returns data on what content the sender has pinned to IPFS through Pinata.
+      /// The purpose of this endpoint is to provide insight into what is being pinned, and how long it has been pinned.
+      /// The results of this call can be filtered using multiple query parameters.
+      /// </summary>
       Task<object> PinList(CancellationToken cancellationToken = default);
    }
 

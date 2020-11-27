@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -13,13 +14,19 @@ namespace Pinata.Client.Models
       public IDictionary<string, JToken> ExtraJson { get; internal set; } = new Dictionary<string, JToken>();
    }
 
-   public partial class TestAuthenticationResponse : Json
+   public class Response : Json
+   {
+      public string Error { get; set; }
+      public bool IsSuccess => string.IsNullOrWhiteSpace(this.Error);
+   }
+
+   public partial class TestAuthenticationResponse : Response
    {
       [JsonProperty("message")]
       public string Message { get; set; }
    }
 
-   public partial class UserPinnedDataTotalResponse : Json
+   public partial class UserPinnedDataTotalResponse : Response
    {
       /// <summary>
       /// The number of pins you currently have pinned with Pinata
@@ -39,4 +46,22 @@ namespace Pinata.Client.Models
       [JsonProperty("pin_size_with_replications_total")]
       public long? PinSizeWithReplicationsTotal { get; set; }
    }
+
+   public class UnpinResponse : Response
+   {
+      public bool IsSuccess => string.IsNullOrWhiteSpace(this.Error);
+   }
+
+   public partial class PinJsonToIpfsResponse : Response
+   {
+      [JsonProperty("IpfsHash")]
+      public string IpfsHash { get; set; }
+
+      [JsonProperty("PinSize")]
+      public long PinSize { get; set; }
+
+      [JsonProperty("Timestamp")]
+      public DateTimeOffset Timestamp { get; set; }
+   }
+
 }

@@ -26,7 +26,7 @@ namespace Pinata.Client.Tests
       {
          this.server.RespondWithJsonTestFile();
 
-         var content = "{\"hello\":\"world\"}";
+         var content = @"{""hello"":""world""}";
 
          var r = await this.client.Pinning.PinJsonToIpfsAsync(content);
 
@@ -42,7 +42,7 @@ namespace Pinata.Client.Tests
       {
          this.server.RespondWithJsonTestFile();
 
-         var content = "{\"hello\":\"world\"}";
+         var content = @"{""hello"":""world""}";
 
          var opts = new PinataOptions
             {
@@ -61,7 +61,7 @@ namespace Pinata.Client.Tests
 
          var r = await this.client.Pinning.PinJsonToIpfsAsync(content, meta, opts);
 
-         var expectedBody = "{\"pinataContent\":{\"hello\":\"world\"},\"pinataOptions\":{\"cidVersion\":1,\"customPinPolicy\":{\"regions\":[{\"id\":\"FRA1\",\"desiredReplicationCount\":1}]}},\"pinataMetadata\":{\"name\":\"hello\",\"keyvalues\":{\"someKey\":\"someValue\"}}}";
+         var expectedBody = @"{""pinataContent"":{""hello"":""world""},""pinataOptions"":{""cidVersion"":1,""customPinPolicy"":{""regions"":[{""id"":""FRA1"",""desiredReplicationCount"":1}]}},""pinataMetadata"":{""name"":""hello"",""keyvalues"":{""someKey"":""someValue""}}}";
 
          this.server.ShouldHaveCalledPath("/pinning/pinJSONToIPFS")
             .WithVerb(Post)
@@ -79,7 +79,7 @@ namespace Pinata.Client.Tests
 
          var r = await this.client.Pinning.PinJsonToIpfsAsync(body);
 
-         var expectedBody = "{\"pinataOptions\":null,\"pinataMetadata\":null,\"pinataContent\":{\"hello\":\"world\"}}";
+         var expectedBody = @"{""pinataOptions"":null,""pinataMetadata"":null,""pinataContent"":{""hello"":""world""}}";
 
          this.server.ShouldHaveCalledPath("/pinning/pinJSONToIPFS")
             .WithVerb(Post)
@@ -110,9 +110,28 @@ namespace Pinata.Client.Tests
             };
          var r = await this.client.Pinning.PinJsonToIpfsAsync(body, meta, opts);
 
-         var expectedBody = "{\"pinataOptions\":{\"cidVersion\":1,\"customPinPolicy\":{\"regions\":[{\"id\":\"FRA1\",\"desiredReplicationCount\":1}]}},\"pinataMetadata\":{\"name\":\"hello\",\"keyvalues\":{\"someKey\":\"someValue\"}},\"pinataContent\":{\"hello\":\"world\"}}";
+         var expectedBody = @"{""pinataOptions"":{""cidVersion"":1,""customPinPolicy"":{""regions"":[{""id"":""FRA1"",""desiredReplicationCount"":1}]}},""pinataMetadata"":{""name"":""hello"",""keyvalues"":{""someKey"":""someValue""}},""pinataContent"":{""hello"":""world""}}";
          this.server.ShouldHaveCalledPath("/pinning/pinJSONToIPFS")
             .WithVerb(Post)
+            .WithExactBody(expectedBody);
+
+         await Verify(r);
+      }
+
+      [Test]
+      public async Task new_user_pin_policy()
+      {
+         this.server.RespondWithJsonTestFile();
+
+         var policy = new PinPolicy();
+         policy.AddOrUpdateRegion("FRA1", 1);
+
+         var r = await this.client.Pinning.UserPinPolicyAsync(policy);
+
+         var expectedBody = @"{""newPinPolicy"":{""regions"":[{""id"":""FRA1"",""desiredReplicationCount"":1}]},""migratePreviousPins"":false}";
+
+         this.server.ShouldHaveCalledPath("/pinning/userPinPolicy")
+            .WithVerb(Put)
             .WithExactBody(expectedBody);
 
          await Verify(r);

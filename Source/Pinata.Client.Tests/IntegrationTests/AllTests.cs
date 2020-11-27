@@ -80,6 +80,7 @@ namespace Pinata.Client.Tests.IntegrationTests
          var body = new { hello = "world" };
          var r = await this.client.Pinning.PinJsonToIpfsAsync(body);
       }
+
       [Test]
       public async Task pinning_pinJson_as_object_with_options()
       {
@@ -106,7 +107,9 @@ namespace Pinata.Client.Tests.IntegrationTests
       [Test]
       public async Task pinning_set_userPinPolicy()
       {
-
+         var policy = new PinPolicy();
+         policy.AddOrUpdateRegion("FRA1", 1);
+         var r = await this.client.Pinning.UserPinPolicyAsync(policy);
       }
    }
 }

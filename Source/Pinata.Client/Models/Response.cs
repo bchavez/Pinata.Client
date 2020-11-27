@@ -5,15 +5,17 @@ namespace Pinata.Client.Models
 {
    public class Response : Json
    {
+      [JsonProperty("message")]
+      public string Message { get; set; }
+
       public string Error { get; set; }
-      public bool IsSuccess => string.IsNullOrWhiteSpace(this.Error);
+
+      public virtual bool IsSuccess => string.IsNullOrWhiteSpace(this.Error);
    }
 
 
    public partial class TestAuthenticationResponse : Response
    {
-      [JsonProperty("message")]
-      public string Message { get; set; }
    }
 
    public partial class UserPinnedDataTotalResponse : Response
@@ -39,7 +41,6 @@ namespace Pinata.Client.Models
 
    public class UnpinResponse : Response
    {
-      public bool IsSuccess => string.IsNullOrWhiteSpace(this.Error);
    }
 
    public partial class PinJsonToIpfsResponse : Response
@@ -53,4 +54,13 @@ namespace Pinata.Client.Models
       [JsonProperty("Timestamp")]
       public DateTimeOffset Timestamp { get; set; }
    }
+
+   public class UserPinPolicyResponse : Response
+   {
+      public string Result { get; set; }
+
+      public override bool IsSuccess => this.Result == "success" &&
+                                        string.IsNullOrWhiteSpace(this.Error);
+   }
+
 }

@@ -69,10 +69,34 @@ namespace Pinata.Client
 
    public interface IPinningEndpoint
    {
+      /// <summary>
+      /// This endpoint allows the sender to unpin content they previously uploaded to Pinata's IPFS nodes
+      /// </summary>
       Task<IFlurlResponse> UnpinAsync(string hashToUnpin, CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// This endpoint allows the sender to add and pin any JSON object they wish to Pinata's IPFS nodes. This endpoint is specifically optimized to only handle JSON content.
+      /// </summary>
+      /// <param name="jsonContent">Any valid JSON string</param>
+      /// <param name="pinataMetadata">Metadata associated with the JSON file</param>
+      /// <param name="pinataOptions">Custom replication policy for this file</param>
+      /// <returns></returns>
       Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(string jsonContent, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// This endpoint allows the sender to add and pin any JSON object they wish to Pinata's IPFS nodes. This endpoint is specifically optimized to only handle JSON content.
+      /// </summary>
+      /// <param name="pinataContent">Any C# object that will be serialized to JSON</param>
+      /// <param name="pinataMetadata">Metadata associated with the JSON file</param>
+      /// <param name="pinataOptions">Custom replication policy for this file</param>
+      /// <returns></returns>
       Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(object pinataContent, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
 
+      /// <summary>
+      /// This endpoint allows the sender to change the pin policy their account.
+      /// Following a successful call of this endpoint, the new pin policy provided will be utilized for every new piece of content pinned to IPFS via Pinata.
+      /// </summary>
+      Task<UserPinPolicyResponse> UserPinPolicyAsync(PinPolicy newPinPolicy, bool migratePreviousPins = false, CancellationToken cancellationToken = default);
    }
 
    public partial class PinataClient : IPinningEndpoint
@@ -89,9 +113,7 @@ namespace Pinata.Client
             .DeleteAsync(cancellationToken);
       }
 
-      Task<PinJsonToIpfsResponse> IPinningEndpoint.PinJsonToIpfsAsync(string jsonContent,
-         PinataMetadata pinataMetadata = null,
-         PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
+      Task<PinJsonToIpfsResponse> IPinningEndpoint.PinJsonToIpfsAsync(string jsonContent, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
       {
          string body = jsonContent;
 
@@ -124,9 +146,7 @@ namespace Pinata.Client
             .ReceiveJson<PinJsonToIpfsResponse>();
       }
 
-      Task<PinJsonToIpfsResponse> IPinningEndpoint.PinJsonToIpfsAsync(object pinataContent,
-         PinataMetadata pinataMetadata = null,
-         PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
+      Task<PinJsonToIpfsResponse> IPinningEndpoint.PinJsonToIpfsAsync(object pinataContent, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
       {
          return this.PinningEndpoint
             .WithClient(this)
@@ -138,6 +158,19 @@ namespace Pinata.Client
                pinataContent
             }, cancellationToken)
             .ReceiveJson<PinJsonToIpfsResponse>();
+      }
+
+      public Task<UserPinPolicyResponse> UserPinPolicyAsync(PinPolicy newPinPolicy, bool migratePreviousPins = false, CancellationToken cancellationToken = default)
+      {
+         return this.PinningEndpoint
+            .WithClient(this)
+            .AppendPathSegment("userPinPolicy")
+            .PutJsonAsync(new
+               {
+                  newPinPolicy,
+                  migratePreviousPins
+               }, cancellationToken)
+            .ReceiveJson<UserPinPolicyResponse>();
       }
    }
 }

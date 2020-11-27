@@ -61,7 +61,7 @@ namespace Pinata.Client.Tests
 
          var r = await this.client.Pinning.PinJsonToIpfsAsync(content, meta, opts);
 
-         var expectedBody = @"{""pinataContent"":{""hello"":""world""},""pinataOptions"":{""cidVersion"":1,""customPinPolicy"":{""regions"":[{""id"":""FRA1"",""desiredReplicationCount"":1}]}},""pinataMetadata"":{""name"":""hello"",""keyvalues"":{""someKey"":""someValue""}}}";
+         var expectedBody = @"{""pinataContent"":{""hello"":""world""},""pinataOptions"":{""cidVersion"":1,""customPinPolicy"":{""regions"":[{""id"":""FRA1"",""desiredReplicationCount"":1}]},""wrapWithDirectory"":null},""pinataMetadata"":{""name"":""hello"",""keyvalues"":{""someKey"":""someValue""}}}";
 
          this.server.ShouldHaveCalledPath("/pinning/pinJSONToIPFS")
             .WithVerb(Post)
@@ -110,7 +110,7 @@ namespace Pinata.Client.Tests
             };
          var r = await this.client.Pinning.PinJsonToIpfsAsync(body, meta, opts);
 
-         var expectedBody = @"{""pinataOptions"":{""cidVersion"":1,""customPinPolicy"":{""regions"":[{""id"":""FRA1"",""desiredReplicationCount"":1}]}},""pinataMetadata"":{""name"":""hello"",""keyvalues"":{""someKey"":""someValue""}},""pinataContent"":{""hello"":""world""}}";
+         var expectedBody = @"{""pinataOptions"":{""cidVersion"":1,""customPinPolicy"":{""regions"":[{""id"":""FRA1"",""desiredReplicationCount"":1}]},""wrapWithDirectory"":null},""pinataMetadata"":{""name"":""hello"",""keyvalues"":{""someKey"":""someValue""}},""pinataContent"":{""hello"":""world""}}";
          this.server.ShouldHaveCalledPath("/pinning/pinJSONToIPFS")
             .WithVerb(Post)
             .WithExactBody(expectedBody);

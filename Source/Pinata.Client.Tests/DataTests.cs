@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -26,6 +27,10 @@ namespace Pinata.Client.Tests
 
          var r = await client.Data.UserPinnedDataTotalAsync();
 
+         this.server
+            .ShouldHaveCalledPath("/data/userPinnedDataTotal")
+            .WithVerb(HttpMethod.Get);
+
          await Verify(r);
       }
 
@@ -35,6 +40,10 @@ namespace Pinata.Client.Tests
          this.server.RespondWithJsonTestFile();
 
          var r = await client.Data.UserPinnedDataTotalAsync();
+
+         this.server
+            .ShouldHaveCalledPath("/data/userPinnedDataTotal")
+            .WithVerb(HttpMethod.Get);
 
          await Verify(r);
       }

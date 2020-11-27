@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ using Pinata.Client.Models;
 
 namespace Pinata.Client
 {
-   public class PinataOptions
+   public class PinataOptions : Json
    {
       /// <summary>
       /// The CID Version IPFS will use when creating a hash for your content. Valid options are:
@@ -25,15 +26,38 @@ namespace Pinata.Client
       /// A custom pin policy for the piece of content being pinned.
       /// </summary>
       [JsonProperty("customPinPolicy")]
-      public string CustomPinPolicy { get; set; }
+      public PinPolicy CustomPinPolicy { get; set; } = new PinPolicy();
    }
 
-   public class CustomPolicy
+   public class PinPolicy : Json
    {
+      [JsonProperty("regions")]
+      public List<Region> Regions { get; set; } = new List<Region>();
 
+      public void AddOrUpdateRegion(string id, int desiredReplicationCount)
+      {
+         var existingRegion = this.Regions.FirstOrDefault(r => r.Id == id);
+         if( existingRegion is null )
+         {
+            this.Regions.Add(new Region { Id = id, DesiredReplicationCount = desiredReplicationCount });
+         }
+         else
+         {
+            existingRegion.DesiredReplicationCount = desiredReplicationCount;
+         }
+      }
    }
 
-   public class PinataMetadata
+   public class Region : Json
+   {
+      [JsonProperty("id")]
+      public string Id { get; set; }
+
+      [JsonProperty("desiredReplicationCount")]
+      public int DesiredReplicationCount { get; set; }
+   }
+
+   public class PinataMetadata : Json
    {
       [JsonProperty("name")]
       public string Name { get; set; }
@@ -46,8 +70,10 @@ namespace Pinata.Client
    public interface IPinningEndpoint
    {
       Task<IFlurlResponse> UnpinAsync(string hashToUnpin, CancellationToken cancellationToken = default);
-      Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(string jsonContent, PinataOptions pinataOptions = null, PinataMetadata pinataMetadata = null);
-      Task<IFlurlResponse> PinJsonToIpfsAsync(object pinataContent, PinataOptions pinataOptions = null, PinataMetadata pinataMetadata = null);
+      Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(string jsonContent, PinataMetadata pinataMetadata = null,
+         PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+      Task<PinJsonToIpfsResponse> PinJsonToIpfsAsync(object pinataContent, PinataMetadata pinataMetadata = null,
+         PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
    }
 
    public partial class PinataClient : IPinningEndpoint
@@ -65,7 +91,8 @@ namespace Pinata.Client
       }
 
       Task<PinJsonToIpfsResponse> IPinningEndpoint.PinJsonToIpfsAsync(string jsonContent,
-         PinataOptions pinataOptions = null, PinataMetadata pinataMetadata = null)
+         PinataMetadata pinataMetadata = null,
+         PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
       {
          string body = jsonContent;
 
@@ -94,11 +121,13 @@ namespace Pinata.Client
          return this.PinningEndpoint
             .WithClient(this)
             .AppendPathSegment("pinJSONToIPFS")
-            .PostAsync(new CapturedJsonContent(body))
+            .PostAsync(new CapturedJsonContent(body), cancellationToken)
             .ReceiveJson<PinJsonToIpfsResponse>();
       }
 
-      Task<IFlurlResponse> IPinningEndpoint.PinJsonToIpfsAsync(object pinataContent, PinataOptions pinataOptions = null, PinataMetadata pinataMetadata = null)
+      Task<PinJsonToIpfsResponse> IPinningEndpoint.PinJsonToIpfsAsync(object pinataContent,
+         PinataMetadata pinataMetadata = null,
+         PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
       {
          return this.PinningEndpoint
             .WithClient(this)
@@ -108,7 +137,8 @@ namespace Pinata.Client
                pinataOptions,
                pinataMetadata,
                pinataContent
-            });
+            }, cancellationToken)
+            .ReceiveJson<PinJsonToIpfsResponse>();
       }
    }
 }

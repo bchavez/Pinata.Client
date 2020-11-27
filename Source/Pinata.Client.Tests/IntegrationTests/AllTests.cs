@@ -49,7 +49,29 @@ namespace Pinata.Client.Tests.IntegrationTests
          var body = new { hello = "world" };
          var json = JsonConvert.SerializeObject(body);
          var r = await this.client.Pinning.PinJsonToIpfsAsync(json);
+      }
 
+      [Test]
+      public async Task pinning_pinJson_as_string_with_options()
+      {
+         var body = new { hello = "world" };
+         var json = JsonConvert.SerializeObject(body);
+         var opts = new PinataOptions
+            {
+               CidVersion = 1,
+            };
+         opts.CustomPinPolicy.AddOrUpdateRegion("FRA1", 1);
+
+         var meta = new PinataMetadata
+            {
+               Name = "hello",
+               KeyValues =
+                  {
+                     { "someKey", "someValue" }
+                  }
+            };
+
+         var r = await this.client.Pinning.PinJsonToIpfsAsync(body, meta, opts);
       }
    }
 }

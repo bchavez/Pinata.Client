@@ -22,6 +22,21 @@ namespace Pinata.Client.Tests
          return JsonConvert.SerializeObject(obj, Formatting.Indented);
       }
 
+      public static HttpCallAssertion ShouldHaveCalledPath(this HttpTest server, string path)
+      {
+         return server.ShouldHaveMadeACall()
+            .With(fc => fc.Request.Url.Path == path);
+      }
+
+      public static HttpCallAssertion WithHaveExactBody(this HttpCallAssertion assert, string body)
+      {
+         return assert.With(fc =>
+            {
+               fc.RequestBody.Should().Be(body);
+               return true;
+            });
+      }
+
       public static HttpTest RespondWithJsonTestFile(this HttpTest server,
          object headers = null,
          [CallerMemberName] string methodName = "",

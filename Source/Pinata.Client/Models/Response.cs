@@ -55,6 +55,18 @@ namespace Pinata.Client.Models
       public DateTimeOffset Timestamp { get; set; }
    }
 
+   public partial class PinFileToIpfsResponse : Response
+   {
+      [JsonProperty("IpfsHash")]
+      public string IpfsHash { get; set; }
+
+      [JsonProperty("PinSize")]
+      public long PinSize { get; set; }
+
+      [JsonProperty("Timestamp")]
+      public DateTimeOffset Timestamp { get; set; }
+   }
+
    public class UserPinPolicyResponse : Response
    {
       public string Result { get; set; }

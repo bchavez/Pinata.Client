@@ -44,7 +44,7 @@ namespace Pinata.Client.Tests.IntegrationTests
       [Test]
       public async Task pinning_unpin()
       {
-         var r = await this.client.Pinning.UnpinAsync("foobar");
+         var r = await this.client.Pinning.UnpinAsync("QmR9HwzakHVr67HFzzgJHoRjwzTTt4wtD6KU4NFe2ArYuj");
       }
 
       [Test]
@@ -131,14 +131,10 @@ namespace Pinata.Client.Tests.IntegrationTests
 ";
          var r = await this.client.Pinning.PinFileToIPFSAsync(content =>
          {
-            var fileData = new StringContent(html, Encoding.UTF8, MediaTypeNames.Text.Html);
-            var header = new ContentDispositionHeaderValue("form-data") {
-               Name = "file",
-               FileName = "test.html"
-            };
-            fileData.Headers.ContentDisposition = header;
+            var file = new StringContent(html, Encoding.UTF8, MediaTypeNames.Text.Html)
+               .AsPinataFile("test2.html");
 
-            content.Add(fileData);
+            content.Add(file);
          });
 
       }

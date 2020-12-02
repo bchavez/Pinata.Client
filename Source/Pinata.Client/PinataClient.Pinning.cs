@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -110,7 +112,7 @@ namespace Pinata.Client
       /// <summary>
       /// This endpoint allows the sender to add and pin any file, or directory, to Pinata's IPFS nodes.
       /// </summary>
-      Task<IFlurlResponse> PinFileToIPFSAsync(Action<CapturedMultipartContent> callback, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+      Task<PinFileToIpfsResponse> PinFileToIPFSAsync(Action<CapturedMultipartContent> payloadBuilder, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
    }
 
    public partial class PinataClient : IPinningEndpoint
@@ -187,14 +189,32 @@ namespace Pinata.Client
             .ReceiveJson<UserPinPolicyResponse>();
       }
 
-      public Task<IFlurlResponse> PinFileToIPFSAsync(Action<CapturedMultipartContent> callback, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
+      public Task<PinFileToIpfsResponse> PinFileToIPFSAsync(Action<CapturedMultipartContent> payloadBuilder, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
       {
+         static void AssertAllHttpContentHasFileName(CapturedMultipartContent content)
+         {
+            foreach( var part in content )
+            {
+               var name = part?.Headers?.ContentDisposition?.Name;
+               var fileName = part?.Headers?.ContentDisposition?.FileName;
+               if( string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(fileName) )
+               {
+                  throw new HttpRequestException("The 'httpContent.Headers.ContentDisposition.(Name|FileName)' is null or whitespace. "+
+                                                 "All multi-part upload content must contain a 'Name' and 'FileName' content disposition header value. "+
+                                                 "Try using the httpContent.AsPinataFile('name.txt') extension method to set the required fields on the HttpContent you are adding.");
+               }
+            }
+         }
+
          return this.PinningEndpoint
             .WithClient(this)
             .AppendPathSegment("pinFileToIPFS")
             .PostMultipartAsync(multiPart =>
             {
-               callback(multiPart);
+               payloadBuilder(multiPart);
+
+               AssertAllHttpContentHasFileName(multiPart);
+
                if( pinataMetadata is not null )
                {
                   multiPart.AddJson("pinataMetadata", pinataMetadata);
@@ -203,7 +223,22 @@ namespace Pinata.Client
                {
                   multiPart.AddJson("pinataOptions", pinataOptions);
                }
-            }, cancellationToken);
+            }, cancellationToken)
+            .ReceiveJson<PinFileToIpfsResponse>();
+      }
+   }
+
+   public static class ExtensionsForHttpContent
+   {
+      public static T AsPinataFile<T>(this T content, string remoteFilePath) where T : HttpContent
+      {
+         var header = new ContentDispositionHeaderValue("form-data")
+            {
+               Name = "file",
+               FileName = remoteFilePath
+            };
+         content.Headers.ContentDisposition = header;
+         return content;
       }
    }
 }

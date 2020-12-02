@@ -1,5 +1,10 @@
+using System.Linq;
+using System.Net.Http;
+using System.Net.Mime;
+using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Flurl.Http.Content;
 using NUnit.Framework;
 using static System.Net.Http.HttpMethod;
 
@@ -138,15 +143,39 @@ namespace Pinata.Client.Tests
       }
 
       [Test]
-      public async Task upload()
+      public async Task pin_html_file()
       {
-         var svg = @"
-<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 100 100"">
-  <circle cx=""50"" cy=""50"" r=""48"" fill=""none"" stroke=""#000""/>
-  <path d=""M50,2a48,48 0 1 1 0,96a24 24 0 1 1 0-48a24 24 0 1 0 0-48""/>
-  <circle cx=""50"" cy=""26"" r=""6""/>
-  <circle cx=""50"" cy=""74"" r=""6"" fill=""#FFF""/>
-</svg>";
+         this.server.RespondWithJsonTestFile();
+
+         var html = @"
+<html>
+   <head>
+      <title>Hello IPFS!</title>
+   </head>
+   <body>
+      <h1>Hello World</h1>
+   </body>
+</html>
+";
+         var r = await this.client.Pinning.PinFileToIPFSAsync(payload =>
+         {
+            var file = new StringContent(html, Encoding.UTF8, MediaTypeNames.Text.Html)
+               .AsPinataFile("index.html");
+
+            payload.Add(file);
+         });
+
+
+         this.server.ShouldHaveCalledPath("/pinning/pinFileToIPFS")
+            .With(fc =>
+            {
+               var content = fc.HttpRequestMessage.Content as CapturedMultipartContent;
+
+               var cds = content.Headers.ContentDisposition;
+               cds.Name.Should().Be("file");
+               cds.FileName.Should().Be("index.html");
+               return true;
+            });
 
 
       }

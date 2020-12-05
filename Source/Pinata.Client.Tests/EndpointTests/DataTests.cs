@@ -1,8 +1,8 @@
-using System.Net.Http;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using static System.Net.Http.HttpMethod;
 
-namespace Pinata.Client.Tests
+namespace Pinata.Client.Tests.EndpointTests
 {
    public class DataTests : MockServerTest
    {
@@ -29,7 +29,7 @@ namespace Pinata.Client.Tests
 
          this.server
             .ShouldHaveCalledPath("/data/userPinnedDataTotal")
-            .WithVerb(HttpMethod.Get);
+            .WithVerb(Get);
 
          await Verify(r);
       }
@@ -43,10 +43,28 @@ namespace Pinata.Client.Tests
 
          this.server
             .ShouldHaveCalledPath("/data/userPinnedDataTotal")
-            .WithVerb(HttpMethod.Get);
+            .WithVerb(Get);
 
          await Verify(r);
       }
 
+      [Test]
+      public async Task Get_Pin_List()
+      {
+         this.server.RespondWithJsonTestFile();
+
+         var filter = new
+            {
+               status = "pinned"
+            };
+
+         var r = await this.client.Data.PinList(filter);
+
+         this.server.ShouldHaveCalledPath("/data/pinList")
+            .WithQueryParam("status", "pinned")
+            .WithVerb(Get);
+
+         await Verify(r);
+      }
    }
 }

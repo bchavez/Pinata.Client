@@ -1,40 +1,198 @@
-﻿using System.IO;
-using System.Net;
-using System.Net.Http;
-using Flurl.Http;
-using Flurl.Http.Configuration;
+﻿using System.Net.Http;
+using System.Net.Mime;
+using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace Pinata.Client.Tests.IntegrationTests
 {
-   public class Secrets
-   {
-      public string ApiKey { get; set; }
-      public string ApiSecret { get; set; }
-   }
-
    [Explicit]
-   public class IntegrationTest : HasVerifyTest
+   public class IntegrationTest : IntegrationTestBase
    {
-      protected Secrets secrets;
+      private PinataClient client;
 
-      public IntegrationTest()
+      [SetUp]
+      public void BeforeEachTest()
       {
-         var startupFolder = Path.GetDirectoryName(typeof(IntegrationTest).Assembly.Location);
-         Directory.SetCurrentDirectory(startupFolder);
-
-         ReadSecrets();
-
-#if NETFRAMEWORK
-         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-#endif
+         var config = new Config
+            {
+               ApiKey = this.secrets.ApiKey,
+               ApiSecret = this.secrets.ApiSecret
+            };
+         client = new PinataClient(config);
+         client.EnableFiddlerDebugProxy("http://localhost.:8888");
       }
 
-      protected void ReadSecrets()
+      [Test]
+      public async Task data_can_auth()
       {
-         var json = File.ReadAllText("../../../.secrets.txt");
-         this.secrets = JsonConvert.DeserializeObject<Secrets>(json);
+         var resp = await this.client.Data.TestAuthenticationAsync();
+      }
+
+      [Test]
+      public async Task data_pin_total()
+      {
+         var resp = await this.client.Data.UserPinnedDataTotalAsync();
+      }
+
+      [Test]
+      public async Task pinning_unpin()
+      {
+         var r = await this.client.Pinning.UnpinAsync("QmR9HwzakHVr67HFzzgJHoRjwzTTt4wtD6KU4NFe2ArYuj");
+      }
+
+      [Test]
+      public async Task pinning_PinJsonToIpfs_string()
+      {
+         var body = new { hello = "world" };
+         var json = JsonConvert.SerializeObject(body);
+         var r = await this.client.Pinning.PinJsonToIpfsAsync(json);
+      }
+
+      [Test]
+      public async Task pinning_PinJsonToIpfs_with_options()
+      {
+         var body = new { hello = "world" };
+         var json = JsonConvert.SerializeObject(body);
+         var opts = new PinataOptions
+            {
+               CidVersion = 1,
+            };
+         opts.CustomPinPolicy.AddOrUpdateRegion("FRA1", 1);
+
+         var meta = new PinataMetadata
+            {
+               Name = "hello",
+               KeyValues =
+                  {
+                     { "someKey", "someValue" }
+                  }
+            };
+
+         var r = await this.client.Pinning.PinJsonToIpfsAsync(json, meta, opts);
+      }
+
+      [Test]
+      public async Task pinning_PinJsonToIpfs_as_object()
+      {
+         var body = new { hello = "world" };
+         var r = await this.client.Pinning.PinJsonToIpfsAsync(body);
+      }
+
+      [Test]
+      public async Task pinning_PinJsonToIpfs_as_object_with_options()
+      {
+         var body = new { hello = "world" };
+
+         var opts = new PinataOptions
+            {
+               CidVersion = 1,
+            };
+         opts.CustomPinPolicy.AddOrUpdateRegion("FRA1", 1);
+
+         var meta = new PinataMetadata
+            {
+               Name = "hello",
+               KeyValues =
+                  {
+                     { "someKey", "someValue" }
+                  }
+            };
+
+         var r = await this.client.Pinning.PinJsonToIpfsAsync(body, meta, opts);
+      }
+
+      [Test]
+      public async Task pinning_UserPinPolicy()
+      {
+         var policy = new PinPolicy();
+         policy.AddOrUpdateRegion("FRA1", 1);
+         var r = await this.client.Pinning.UserPinPolicyAsync(policy);
+      }
+
+      [Test]
+      public async Task pinning_PinFileToIpfs_with_StringContent()
+      {
+         var html = @"
+<html>
+   <head>
+      <title>Hello IPFS!</title>
+   </head>
+   <body>
+      <h1>Hello World</h1>
+   </body>
+</html>
+";
+         var r = await this.client.Pinning.PinFileToIpfsAsync(content =>
+            {
+               var file = new StringContent(html, Encoding.UTF8, MediaTypeNames.Text.Html);
+
+               content.AddPinataFile(file, "test2.html");
+         });
+      }
+
+      [Test]
+      public async Task pinning_HashMetadata_set()
+      {
+         var meta = new PinataMetadata
+            {
+               Name = "test3.html",
+               KeyValues =
+                  {
+                     {"barbar", "jarjar"}
+                  }
+            };
+         var hash = "QmR9HwzakHVr67HFzzgJHoRjwzTTt4wtD6KU4NFe2ArYuj";
+
+         var r = await this.client.Pinning.HashMetadataAsync(hash, meta);
+      }
+
+      [Test]
+      public async Task pinning_HashPinPolicy_set()
+      {
+         var policy = new PinPolicy();
+         policy.AddOrUpdateRegion("NYC1", 1);
+         policy.AddOrUpdateRegion("FRA1", 0);
+
+         var hash = "QmR9HwzakHVr67HFzzgJHoRjwzTTt4wtD6KU4NFe2ArYuj";
+
+         var r = await this.client.Pinning.HashPinPolicyAsync(hash, policy);
+      }
+
+      [Test]
+      public async Task pinning_PinByHash()
+      {
+         var hash = "Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvBye";
+
+         var r = await this.client.Pinning.PinByHashAsync(hash);
+      }
+
+      [Test]
+      public async Task pinning_PinJobs()
+      {
+         var filters = new
+            {
+               filter =  new
+                  {
+                     sort = "ASC"
+                  },
+               additionalFilter = new
+                  {
+                     limit = 5
+                  }
+            };
+         var r = await this.client.Pinning.PinJobs(filters);
+      }
+
+      [Test]
+      public async Task data_PinList()
+      {
+         var filter = new
+            {
+               status = "pinned"
+            };
+         var r = await this.client.Data.PinList(filter);
       }
    }
 }

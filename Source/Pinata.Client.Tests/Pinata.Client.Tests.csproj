@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netcoreapp2.1;net472</TargetFrameworks>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <SignAssembly>false</SignAssembly>
@@ -18,7 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="NunitXml.TestLogger" Version="2.1.62" />
-    <PackageReference Include="Verify.NUnit" Version="6.14.1" />
+    <PackageReference Include="Verify.NUnit" Version="8.11.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pinata.Client\Pinata.Client.csproj" />
@@ -28,6 +28,14 @@
       <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="IntegrationTests\IntegrationTest.data_pin_total.verified.json">
+      <DependentUpon>IntegrationTest.cs</DependentUpon>
+    </None>
+    <None Update="IntegrationTests\IntegrationTest.can_auth.verified.json">
+      <DependentUpon>IntegrationTest.cs</DependentUpon>
     </None>
   </ItemGroup>
 </Project>

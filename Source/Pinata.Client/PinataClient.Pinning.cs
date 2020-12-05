@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using System.Threading;
@@ -18,66 +17,6 @@ using Pinata.Client.Models;
 
 namespace Pinata.Client
 {
-   public class PinataOptions : Json
-   {
-      /// <summary>
-      /// The CID Version IPFS will use when creating a hash for your content. Valid options are:
-      /// "0" - CIDv0, "1" - CIDv1
-      /// </summary>
-      [JsonProperty("cidVersion")]
-      public int CidVersion { get; set; }
-
-      /// <summary>
-      /// A custom pin policy for the piece of content being pinned.
-      /// </summary>
-      [JsonProperty("customPinPolicy")]
-      public PinPolicy CustomPinPolicy { get; set; } = new PinPolicy();
-
-      /// <summary>
-      /// Wrap your content inside of a directory when adding to IPFS. This allows users to retrieve content via a filename instead of just a hash.
-      /// </summary>
-      [JsonProperty("wrapWithDirectory")]
-      public bool? WrapWithDirectory { get; set; }
-   }
-
-   public class PinPolicy : Json
-   {
-      [JsonProperty("regions")]
-      public List<Region> Regions { get; set; } = new List<Region>();
-
-      public void AddOrUpdateRegion(string id, int desiredReplicationCount)
-      {
-         var existingRegion = this.Regions.FirstOrDefault(r => r.Id == id);
-         if( existingRegion is null )
-         {
-            this.Regions.Add(new Region { Id = id, DesiredReplicationCount = desiredReplicationCount });
-         }
-         else
-         {
-            existingRegion.DesiredReplicationCount = desiredReplicationCount;
-         }
-      }
-   }
-
-   public class Region : Json
-   {
-      [JsonProperty("id")]
-      public string Id { get; set; }
-
-      [JsonProperty("desiredReplicationCount")]
-      public int DesiredReplicationCount { get; set; }
-   }
-
-   public class PinataMetadata : Json
-   {
-      [JsonProperty("name")]
-      public string Name { get; set; }
-
-      [JsonProperty("keyvalues")]
-      public Dictionary<string, string> KeyValues { get; set; } = new Dictionary<string, string>();
-   }
-
-
    public interface IPinningEndpoint
    {
       /// <summary>
@@ -112,7 +51,29 @@ namespace Pinata.Client
       /// <summary>
       /// This endpoint allows the sender to add and pin any file, or directory, to Pinata's IPFS nodes.
       /// </summary>
-      Task<PinFileToIpfsResponse> PinFileToIPFSAsync(Action<CapturedMultipartContent> payloadBuilder, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+      Task<PinFileToIpfsResponse> PinFileToIpfsAsync(Action<CapturedMultipartContent> payloadBuilder, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// This endpoint allows the sender to change name and custom key values associated for a piece of content stored on Pinata.
+      /// Changes made via this endpoint only affect the metadata for the hash passed in.
+      /// </summary>
+      Task<IFlurlResponse> HashMetadataAsync(string ipfsPinHash, PinataMetadata pinataMetadata, CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// This endpoint allows the sender to change the pin policy for an individual piece of content.
+      /// Changes made via this endpoint only affect the content for the hash passed in. They do not affect a user's account level pin policy.
+      /// </summary>
+      Task<IFlurlResponse> HashPinPolicyAsync(string ipfsPinHash, PinPolicy newPinPolicy, CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// This endpoint allows you to add a hash to Pinata for asynchronous pinning. Content added through this endpoint is pinned in the background and will show up in your pinned items once the content has been found / pinned. In for this operation to succeed, the content for the hash you provide must already be pinned by another node on the IFPS network.
+      /// </summary>
+      Task<PinByHashResponse> PinByHashAsync(string hashToPin, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default);
+
+      /// <summary>
+      /// Retrieves a list of all the pins that are currently in the pin queue for your user.
+      /// </summary>
+      Task<PinJobResponse> PinJobs(object queryParamFilters = null, CancellationToken cancellationToken = default);
    }
 
    public partial class PinataClient : IPinningEndpoint
@@ -168,11 +129,11 @@ namespace Pinata.Client
             .WithClient(this)
             .AppendPathSegment("pinJSONToIPFS")
             .PostJsonAsync(new
-            {
-               pinataOptions,
-               pinataMetadata,
-               pinataContent
-            }, cancellationToken)
+               {
+                  pinataOptions,
+                  pinataMetadata,
+                  pinataContent
+               }, cancellationToken)
             .ReceiveJson<PinJsonToIpfsResponse>();
       }
 
@@ -189,7 +150,7 @@ namespace Pinata.Client
             .ReceiveJson<UserPinPolicyResponse>();
       }
 
-      public Task<PinFileToIpfsResponse> PinFileToIPFSAsync(Action<CapturedMultipartContent> payloadBuilder, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
+      public Task<PinFileToIpfsResponse> PinFileToIpfsAsync(Action<CapturedMultipartContent> payloadBuilder, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
       {
          static void AssertAllHttpContentHasFileName(CapturedMultipartContent content)
          {
@@ -210,35 +171,69 @@ namespace Pinata.Client
             .WithClient(this)
             .AppendPathSegment("pinFileToIPFS")
             .PostMultipartAsync(multiPart =>
-            {
-               payloadBuilder(multiPart);
-
-               AssertAllHttpContentHasFileName(multiPart);
-
-               if( pinataMetadata is not null )
                {
-                  multiPart.AddJson("pinataMetadata", pinataMetadata);
-               }
-               if( pinataOptions is not null )
-               {
-                  multiPart.AddJson("pinataOptions", pinataOptions);
-               }
-            }, cancellationToken)
+                  payloadBuilder(multiPart);
+
+                  AssertAllHttpContentHasFileName(multiPart);
+
+                  if( pinataMetadata is not null )
+                  {
+                     multiPart.AddJson("pinataMetadata", pinataMetadata);
+                  }
+                  if( pinataOptions is not null )
+                  {
+                     multiPart.AddJson("pinataOptions", pinataOptions);
+                  }
+               }, cancellationToken)
             .ReceiveJson<PinFileToIpfsResponse>();
       }
-   }
 
-   public static class ExtensionsForHttpContent
-   {
-      public static T AsPinataFile<T>(this T content, string remoteFilePath) where T : HttpContent
+      public Task<IFlurlResponse> HashMetadataAsync(string ipfsPinHash, PinataMetadata pinataMetadata, CancellationToken cancellationToken = default)
       {
-         var header = new ContentDispositionHeaderValue("form-data")
-            {
-               Name = "file",
-               FileName = remoteFilePath
-            };
-         content.Headers.ContentDisposition = header;
-         return content;
+         return this.PinningEndpoint
+            .WithClient(this)
+            .AppendPathSegment("hashMetadata")
+            .PutJsonAsync(new
+               {
+                  ipfsPinHash,
+                  name = pinataMetadata.Name,
+                  keyvalues = pinataMetadata.KeyValues
+               }, cancellationToken);
+      }
+
+      public Task<IFlurlResponse> HashPinPolicyAsync(string ipfsPinHash, PinPolicy newPinPolicy, CancellationToken cancellationToken = default)
+      {
+         return this.PinningEndpoint
+            .WithClient(this)
+            .AppendPathSegment("hashPinPolicy")
+            .PutJsonAsync(new
+               {
+                  ipfsPinHash,
+                  newPinPolicy
+               }, cancellationToken);
+      }
+
+      public Task<PinByHashResponse> PinByHashAsync(string hashToPin, PinataMetadata pinataMetadata = null, PinataOptions pinataOptions = null, CancellationToken cancellationToken = default)
+      {
+         return this.PinningEndpoint
+            .WithClient(this)
+            .AppendPathSegment("pinByHash")
+            .PostJsonAsync(new
+               {
+                  hashToPin,
+                  pinataMetadata,
+                  pinataOptions
+               }, cancellationToken)
+            .ReceiveJson<PinByHashResponse>();
+      }
+
+      public Task<PinJobResponse> PinJobs(object queryParamFilters = null, CancellationToken cancellationToken = default)
+      {
+         return this.PinningEndpoint
+            .WithClient(this)
+            .AppendPathSegment("pinJobs")
+            .SetQueryParams(queryParamFilters)
+            .GetJsonAsync<PinJobResponse>(cancellationToken);
       }
    }
 }

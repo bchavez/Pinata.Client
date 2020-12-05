@@ -75,4 +75,81 @@ namespace Pinata.Client.Models
                                         string.IsNullOrWhiteSpace(this.Error);
    }
 
+   public class PinByHashResponse : Response
+   {
+      [JsonProperty("id")]
+      public string Id { get; set; }
+
+      [JsonProperty("ipfsHash")]
+      public string IpfsHash { get; set; }
+
+      [JsonProperty("status")]
+      public string Status { get; set; }
+
+      [JsonProperty("name")]
+      public string Name { get; set; }
+   }
+
+   public class PinListResponse : Response
+   {
+      [JsonProperty("count")]
+      public long Count { get; set; }
+
+      [JsonProperty("rows")]
+      public PinListRow[] Rows { get; set; }
+   }
+
+   public partial class PinListRow : Json
+   {
+      [JsonProperty("id")]
+      public string Id { get; set; }
+
+      [JsonProperty("ipfs_pin_hash")]
+      public string IpfsPinHash { get; set; }
+
+      [JsonProperty("size")]
+      public long Size { get; set; }
+
+      [JsonProperty("user_id")]
+      public string UserId { get; set; }
+
+      [JsonProperty("date_pinned")]
+      public DateTimeOffset? DatePinned { get; set; }
+
+      [JsonProperty("date_unpinned")]
+      public DateTimeOffset? DateUnpinned { get; set; }
+
+      [JsonProperty("metadata")]
+      public PinataMetadata Metadata { get; set; }
+
+      [JsonProperty("regions")]
+      public Region[] Regions { get; set; }
+   }
+
+   public class PinJobResponse : Response
+   {
+      [JsonProperty("count")]
+      public long Count { get; set; }
+
+      [JsonProperty("rows")]
+      public PinJobRow[] Rows { get; set; }
+   }
+
+   public class PinJobRow : Json
+   {
+      [JsonProperty("id")]
+      public string Id { get; set; }
+
+      [JsonProperty("ipfs_pin_hash")]
+      public string IpfsPinHash { get; set; }
+
+      [JsonProperty("date_queued")]
+      public DateTimeOffset? DateQueued { get; set; }
+
+      [JsonProperty("name")]
+      public string Name { get; set; }
+
+      [JsonProperty("status")]
+      public string Status { get; set; }
+   }
 }

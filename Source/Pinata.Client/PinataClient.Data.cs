@@ -27,7 +27,7 @@ namespace Pinata.Client
       /// The purpose of this endpoint is to provide insight into what is being pinned, and how long it has been pinned.
       /// The results of this call can be filtered using multiple query parameters.
       /// </summary>
-      Task<object> PinList(CancellationToken cancellationToken = default);
+      Task<PinListResponse> PinList(object queryParamFilters = null, CancellationToken cancellationToken = default);
    }
 
    public partial class PinataClient : IDataEndpoint
@@ -44,7 +44,7 @@ namespace Pinata.Client
             .GetJsonAsync<TestAuthenticationResponse>(cancellationToken);
       }
 
-      Task<UserPinnedDataTotalResponse> IDataEndpoint.UserPinnedDataTotalAsync(CancellationToken cancellationToken)
+      Task<UserPinnedDataTotalResponse> IDataEndpoint.UserPinnedDataTotalAsync(CancellationToken cancellationToken = default)
       {
          return this.DataEndpoint
             .WithClient(this)
@@ -52,9 +52,13 @@ namespace Pinata.Client
             .GetJsonAsync<UserPinnedDataTotalResponse>(cancellationToken);
       }
 
-      Task<object> IDataEndpoint.PinList(CancellationToken cancellationToken)
+      Task<PinListResponse> IDataEndpoint.PinList(object queryParamFilters = null, CancellationToken cancellationToken = default)
       {
-         throw new System.NotImplementedException();
+         return this.DataEndpoint
+            .WithClient(this)
+            .AppendPathSegment("pinList")
+            .SetQueryParams(queryParamFilters)
+            .GetJsonAsync<PinListResponse>(cancellationToken);
       }
    }
 }

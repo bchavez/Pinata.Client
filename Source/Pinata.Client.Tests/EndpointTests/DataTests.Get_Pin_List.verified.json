@@ -1,0 +1,47 @@
+{
+  count: 2,
+  rows: [
+    {
+      id: gggg,
+      ipfs_pin_hash: QmR9HwzakHVr67HFzzgJHoRjwzTTt4wtD6KU4NFe2ArYuj,
+      size: 136,
+      user_id: ffffff,
+      date_pinned: DateTimeOffset_1,
+      metadata: {
+        name: test3.html,
+        keyvalues: {
+          barbar: jarjar
+        }
+      },
+      regions: [
+        {
+          regionId: FRA1,
+          currentReplicationCount: 0
+        },
+        {
+          desiredReplicationCount: 1,
+          regionId: NYC1,
+          currentReplicationCount: 1
+        }
+      ]
+    },
+    {
+      id: gggg,
+      ipfs_pin_hash: Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye,
+      size: 7345778,
+      user_id: fffff,
+      date_pinned: DateTimeOffset_2,
+      metadata: {
+        name: bogus_ipfs2
+      },
+      regions: [
+        {
+          desiredReplicationCount: 1,
+          regionId: FRA1,
+          currentReplicationCount: 1
+        }
+      ]
+    }
+  ],
+  IsSuccess: true
+}

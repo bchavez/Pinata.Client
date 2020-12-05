@@ -1,0 +1,50 @@
+{
+  "count": 2,
+  "rows": [
+    {
+      "id": "gggg",
+      "ipfs_pin_hash": "QmR9HwzakHVr67HFzzgJHoRjwzTTt4wtD6KU4NFe2ArYuj",
+      "size": 136,
+      "user_id": "ffffff",
+      "date_pinned": "2020-12-05T19:48:38.780Z",
+      "date_unpinned": null,
+      "metadata": {
+        "name": "test3.html",
+        "keyvalues": {
+          "barbar": "jarjar"
+        }
+      },
+      "regions": [
+        {
+          "regionId": "FRA1",
+          "currentReplicationCount": 0,
+          "desiredReplicationCount": 0
+        },
+        {
+          "regionId": "NYC1",
+          "currentReplicationCount": 1,
+          "desiredReplicationCount": 1
+        }
+      ]
+    },
+    {
+      "id": "gggg",
+      "ipfs_pin_hash": "Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye",
+      "size": 7345778,
+      "user_id": "fffff",
+      "date_pinned": "2020-11-29T20:40:56.957Z",
+      "date_unpinned": null,
+      "metadata": {
+        "name": "bogus_ipfs2",
+        "keyvalues": null
+      },
+      "regions": [
+        {
+          "regionId": "FRA1",
+          "currentReplicationCount": 1,
+          "desiredReplicationCount": 1
+        }
+      ]
+    }
+  ]
+}

@@ -5,7 +5,7 @@ Pinata.Client for .NET/C# Library
 
 Project Description
 -------------------
-A .NET implementation for the [Pinata API](https://pinata.cloud/documentation).
+A .NET implementation for [Pinata Cloud](https://pinata.cloud/documentation).
 
 [1]:https://docs.microsoft.com/en-us/mem/configmgr/core/plan-design/security/enable-tls-1-2-client
 [2]:https://docs.microsoft.com/en-us/dotnet/framework/network-programming/tls
@@ -30,11 +30,66 @@ Install-Package Pinata.Client
 Getting Started
 ------
 
+```csharp
+var config = new Config
+   {
+      ApiKey = "2981f1eb1813daf...",
+      ApiSecret = "42281fa28de32fe3c..."
+   };
+
+var client = new PinataClient(config);
+
+var html = @"
+<html>
+   <head>
+      <title>Hello IPFS!</title>
+   </head>
+   <body>
+      <h1>Hello World</h1>
+   </body>
+</html>
+";
+
+var metadata = new PinataMetadata // optional
+   {
+      KeyValues =
+         {
+            {"Author", "Brian Chavez"}
+         }
+   };
+
+var options = new PinataOptions(); // optional
+
+options.CustomPinPolicy.AddOrUpdateRegion("NYC1", desiredReplicationCount: 1);
+
+var response = await this.client.Pinning.PinFileToIpfsAsync(content =>
+      {
+         var file = new StringContent(html, Encoding.UTF8, MediaTypeNames.Text.Html);
+
+         content.AddPinataFile(file, "index.html");
+      },
+   metadata,
+   options);
+
+if( response.IsSuccess )
+{
+   //File uploaded to Pinata Cloud and can be accessed on IPFS!
+   var hash = response.IpfsHash; // QmR9HwzakHVr67HFzzgJHoRjwzTTt4wtD6KU4NFe2ArYuj
+}
+```
+
+Now your file can be accessed over [IPFS](https://ipfs.io/) and accessed via [Cloudflare's IPFS gateway](https://cloudflare-ipfs.com/)!
+
+```
+https://cloudflare-ipfs.com/ipfs/QmR9HwzakHVr67HFzzgJHoRjwzTTt4wtD6KU4NFe2ArYuj
+```
+
+Find more examples [here](https://github.com/bchavez/Pinata.Client/blob/master/Source/Pinata.Client.Tests/IntegrationTests/IntegrationTest.cs).
 
 -------
 
 
-Easy peasy! **Happy file sharing!** :tada:
+Magic! Easy peasy! **Happy file sharing!** :tada:
 
 
 Reference

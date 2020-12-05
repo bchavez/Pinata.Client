@@ -133,6 +133,46 @@ namespace Pinata.Client.Tests.IntegrationTests
       }
 
       [Test]
+      public async Task pinning_PinFileToIpfs_with_StringContent_with_options()
+      {
+         var html = @"
+<html>
+   <head>
+      <title>Hello IPFS!</title>
+   </head>
+   <body>
+      <h1>Hello World</h1>
+   </body>
+</html>
+";
+         var metadata = new PinataMetadata // optional
+            {
+               KeyValues =
+                  {
+                     {"Author", "Brian Chavez"}
+                  }
+            };
+
+         var options = new PinataOptions(); // optional
+         options.CustomPinPolicy.AddOrUpdateRegion("NYC1", desiredReplicationCount: 1);
+
+         var response = await this.client.Pinning.PinFileToIpfsAsync(content =>
+               {
+                  var file = new StringContent(html, Encoding.UTF8, MediaTypeNames.Text.Html);
+
+                  content.AddPinataFile(file, "index.html");
+               },
+            metadata,
+            options);
+
+         if( response.IsSuccess )
+         {
+            //File uploaded to Pinata Cloud, now on IPFS!
+            var hash = response.IpfsHash;
+         }
+      }
+
+      [Test]
       public async Task pinning_HashMetadata_set()
       {
          var meta = new PinataMetadata

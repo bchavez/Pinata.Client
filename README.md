@@ -16,7 +16,6 @@ A .NET implementation for [Pinata Cloud](https://pinata.cloud/documentation).
 
 #### Crypto Tip Jar
 <a href="https://commerce.coinbase.com/checkout/53604209-ec9d-47b1-9b81-b3ea04a6f8c6"><img src="https://raw.githubusercontent.com/bchavez/Pinata.Client/master/Docs/tipjar.png" /></a>
-* :dog2: **Dogecoin**: `DCLn3e1utFR99MG9eEHAX4XvYeR622top8`
 
 
 
